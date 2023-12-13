@@ -19,7 +19,7 @@ function Install-Go {
     Invoke-WebRequest  "$addr$hash" -OutFile  $hash
     $cmp = Get-FileHash -Algorithm SHA256 $download
     if($cmp.Hash -ine (Get-Content $hash)) {
-        "error verifying hash"
+        throw "error verifying hash"
         return
     }
     tar -xf $download
