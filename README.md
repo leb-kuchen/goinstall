@@ -1,6 +1,6 @@
 ## flags
 ```pwsh
-$version = "", # go version
+$version = "", # go version or (l)atest
 $action = "", # (u)pdate (i)nstall (r)remove
 $arch = "amd64",
 $os = "linux",

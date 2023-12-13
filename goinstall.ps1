@@ -7,11 +7,27 @@ param(
     $ext = "tar.gz"
    
 )
+$ErrorActionPreference = "Stop"
+function Get-Latest-Go-Version {
+    param(
+        [string]$url,
+        [string]$versionRegex
+    )
+    $html = Invoke-WebRequest -Uri $url
+    $match = $html.Content | Select-String -Pattern $versionRegex -AllMatches
+    $latestVersion = $match.Matches | ForEach-Object { $_.Groups[1].Value } | Sort-Object { [Version]$_ } -Descending | Select-Object -First 1
+    return $latestVersion
+}
+
 function Install-Go {
-    if ($version -eq "" ){
+   if ($version -eq "" ){
         $version = Read-Host "go version"
     }
-  
+    if ($version.StartsWith("l")) {
+        $regex = '<a[^>]*href="/dl/go(\d+(\.\d+)+)\.{0}-{1}\.{2}[^>]*>' -f $os, $arch, $ext
+        $latest = Get-Latest-Go-Version  "https://go.dev/dl/" $regex
+        $version = $latest
+    }
     $download = "go$version.$os-$arch.$ext"
     $hash = "$download.sha256"
     $addr = "https://dl.google.com/go/"
@@ -20,7 +36,6 @@ function Install-Go {
     $cmp = Get-FileHash -Algorithm SHA256 $download
     if($cmp.Hash -ine (Get-Content $hash)) {
         throw "error verifying hash"
-        return
     }
     tar -xf $download
     sudo chown -R root:root ./go
