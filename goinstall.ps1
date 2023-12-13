@@ -31,6 +31,7 @@ function Install-Go {
     $download = "go$version.$os-$arch.$ext"
     $hash = "$download.sha256"
     $addr = "https://dl.google.com/go/"
+    try {
     Invoke-WebRequest "$addr$download" -OutFile $download
     Invoke-WebRequest  "$addr$hash" -OutFile  $hash
     $cmp = Get-FileHash -Algorithm SHA256 $download
@@ -49,6 +50,10 @@ if (-not (Test-Path $PROFILE)) {
 }
  $exp >> $PROFILE
  go version
+} catch {
+   Remove-Item $download
+   Remove-Item $hash 
+}
 }
 function Remove-Go {
     sudo rm -rf /usr/local/go
