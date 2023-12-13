@@ -20,7 +20,7 @@ function Get-Latest-Go-Version {
 }
 
 function Install-Go {
-   if ($version -eq "" ){
+    if ($version -eq "" ) {
         $version = Read-Host "go version"
     }
     if ($version.StartsWith("l")) {
@@ -32,28 +32,29 @@ function Install-Go {
     $hash = "$download.sha256"
     $addr = "https://dl.google.com/go/"
     try {
-    Invoke-WebRequest "$addr$download" -OutFile $download
-    Invoke-WebRequest  "$addr$hash" -OutFile  $hash
-    $cmp = Get-FileHash -Algorithm SHA256 $download
-    if($cmp.Hash -ine (Get-Content $hash)) {
-        throw "error verifying hash"
-    }
-    tar -xf $download
-    sudo chown -R root:root ./go
-    sudo mv -v go /usr/local
-    $exp = @'
+        Invoke-WebRequest "$addr$download" -OutFile $download
+        Invoke-WebRequest  "$addr$hash" -OutFile  $hash
+        $cmp = Get-FileHash -Algorithm SHA256 $download
+        if ($cmp.Hash -ine (Get-Content $hash)) {
+            throw "error verifying hash"
+        }
+        tar -xf $download
+        sudo chown -R root:root ./go
+        sudo mv -v go /usr/local
+        $exp = @'
     $env:GOPATH = "$env:HOME/go"
     $env:PATH += ":/usr/local/go/bin:$env:GOPATH/bin"
 '@
-if (-not (Test-Path $PROFILE)) {
-    New-Item -Path $PROFILE -ItemType File -Force
-}
- $exp >> $PROFILE
- go version
-} catch {
-   Remove-Item $download
-   Remove-Item $hash 
-}
+        if (-not (Test-Path $PROFILE)) {
+            New-Item -Path $PROFILE -ItemType File -Force
+        }
+        $exp >> $PROFILE
+        go version
+    }
+    finally {
+        Remove-Item $download
+        Remove-Item $hash 
+    }
 }
 function Remove-Go {
     sudo rm -rf /usr/local/go
@@ -64,11 +65,11 @@ function Update-Go {
     Install-Go
 
 }
-if ($action -eq "" ){
+if ($action -eq "" ) {
     $action = Read-Host "(u)pdate, (i)nstall, (r)remove go"
 }
 
-switch( $action.Trim().ToLower()[0] ){
+switch ( $action.Trim().ToLower()[0] ) {
     "u" {
         Update-Go
     }
